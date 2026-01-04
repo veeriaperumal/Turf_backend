@@ -22,9 +22,13 @@ from rest_framework_simplejwt.views import (
 )
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
 
+def health(request):
+    return JsonResponse({"status": "ok"})
 
 urlpatterns = [
+    path("health/", health),
     path('admin/', admin.site.urls),
     path("api/token/", TokenObtainPairView.as_view()),
     path("api/token/refresh/", TokenRefreshView.as_view()),
