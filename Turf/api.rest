@@ -1,0 +1,71 @@
+POST http://127.0.0.1:8081/api/login/
+Content-Type: application/json
+
+
+{
+  "email": "mageshan@gmail.com",
+  "password": "securePassword123"
+}
+
+###
+POST http://localhost:8081/api/bookings/validate/
+Content-Type: application/json  
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MTMzMTIwLCJpYXQiOjE3Njc1MjgzMjAsImp0aSI6ImJmZjZhMDEzZDg2NTQ5NWJhNTE0ZTZiNmNlZDQ0Mjc2IiwidXNlcl9pZCI6IjQiLCJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6Im1hZ2VzaGFuQGdtYWlsLmNvbSJ9.aS4MnmkkYUTQISJkGuyuOxq5fOglnLUkVvAiAw5Nfbw
+
+{
+  "turf_id": 1,
+  "selected_date": "2026-05-20",
+  "selected_slots": [
+    "13:00"
+  ]
+}
+
+
+
+####
+POST  http://localhost:8081/api/bookings/confirm/
+Content-Type: application/json  
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MTMzMTIwLCJpYXQiOjE3Njc1MjgzMjAsImp0aSI6ImJmZjZhMDEzZDg2NTQ5NWJhNTE0ZTZiNmNlZDQ0Mjc2IiwidXNlcl9pZCI6IjQiLCJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6Im1hZ2VzaGFuQGdtYWlsLmNvbSJ9.aS4MnmkkYUTQISJkGuyuOxq5fOglnLUkVvAiAw5Nfbw
+
+{
+  "turf_details": {
+    "turf_id": 1
+  },
+  "booking_details": {
+    "date": "2026-05-20",
+    "slots": [
+      "3:00 PM",
+      "4:00 PM"
+    ]
+  },
+  "payment_details": {
+    "payment_method": "google_pay",
+    "transaction_id": "txn_123456789"
+  }
+}
+
+
+###
+GET  http://localhost:8081/api/turfs/bookings/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MTMzMTIwLCJpYXQiOjE3Njc1MjgzMjAsImp0aSI6ImJmZjZhMDEzZDg2NTQ5NWJhNTE0ZTZiNmNlZDQ0Mjc2IiwidXNlcl9pZCI6IjQiLCJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6Im1hZ2VzaGFuQGdtYWlsLmNvbSJ9.aS4MnmkkYUTQISJkGuyuOxq5fOglnLUkVvAiAw5Nfbw
+
+####
+POST http://localhost:8081/api/bookings/pay/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MTMzMTIwLCJpYXQiOjE3Njc1MjgzMjAsImp0aSI6ImJmZjZhMDEzZDg2NTQ5NWJhNTE0ZTZiNmNlZDQ0Mjc2IiwidXNlcl9pZCI6IjQiLCJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6Im1hZ2VzaGFuQGdtYWlsLmNvbSJ9.aS4MnmkkYUTQISJkGuyuOxq5fOglnLUkVvAiAw5Nfbw
+
+
+{
+  "turf_id": 1,
+  "booking_details": {
+    "date": "2026-01-10",
+    "start_time": "3:00",
+    "duration_hours": 1
+  },
+  "payment_info": {
+    "method": "UPI",
+    "transaction_ref": "TXN_UPI_778900"
+  },
+  "device_timestamp": "2026-05-20T18:05:00Z"
+}
