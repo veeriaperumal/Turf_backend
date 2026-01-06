@@ -289,3 +289,15 @@ class Payment(models.Model):
 
     def __str__(self):
         return self.transaction_ref
+
+class MaintenanceBlock(models.Model):
+    turf = models.ForeignKey(Turf, on_delete=models.CASCADE)
+    date = models.DateField()
+
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    reason = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"Maintenance {self.turf.name}"

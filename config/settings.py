@@ -12,7 +12,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from datetime import timedelta
 import os
+from dotenv import load_dotenv
+
+
 from pathlib import Path
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,7 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Accounts',
     'Turf',
-    'rest_framework',
+    'rest_framework', 
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -52,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -146,7 +154,38 @@ REST_FRAMEWORK = {
 }
 
 
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    # 🔐 Token lifetime
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+
+
+    # 🔄 Refresh behavior
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": False,
+
+    # 🔐 JWT settings
+    "ALGORITHM": "HS256",
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+
+    # 👤 User mapping
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+
+    # 🧾 Token claims
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "JTI_CLAIM": "jti",
+
+    # 📌 Serializers (PAIR TOKENS ONLY)
+    "TOKEN_OBTAIN_SERIALIZER":
+        "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+    "TOKEN_REFRESH_SERIALIZER":
+        "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
+    "TOKEN_VERIFY_SERIALIZER":
+        "rest_framework_simplejwt.serializers.TokenVerifySerializer",
+    "TOKEN_BLACKLIST_SERIALIZER":
+        "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
 }

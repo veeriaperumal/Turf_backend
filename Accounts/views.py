@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 
 from Turf.models import Amenity, Sport, Turf
-from .serializers import BusinessRegisterSerializer, BusinessUpdateByIDSerializer, CustomerRegisterSerializer, ProfileUpdateSerializer
+from .serializers import BusinessRegisterSerializer, BusinessUpdateByIDSerializer, CustomerRegisterSerializer, ProfileSerializer, ProfileUpdateSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -64,6 +64,7 @@ class BusinessRegisterView(APIView):
         
 
 class LoginView(TokenObtainPairView):
+    permission_classes= [AllowAny]
     serializer_class = LoginSerializer
 
 
@@ -83,6 +84,16 @@ class ProfileUpdateView(APIView):
             "message": "Profile updated successfully",
             "data": serializer.data
         }, status=200)
+        
+        
+    def get(self, request):
+        serializer = ProfileSerializer(request.user)
+        return Response({
+            "status": "success",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    
         
 class BusinessUpdateView(APIView):
     permission_classes = [IsAuthenticated]

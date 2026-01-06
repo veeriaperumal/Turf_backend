@@ -34,6 +34,20 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "full_name",
+            "phone_number",
+            "location",
+            "profile_image_url",
+            "role",
+            "is_active",
+            "created_at",
+        )
 
 
 # users/serializers.py
@@ -202,10 +216,11 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             "full_name",
             "phone_number",
             "location",
+            "profile_image_url"
         ]
 
     def validate_phone_number(self, value):
-        if len(value) < 10:
+        if value and len(value) < 10:
             raise serializers.ValidationError("Invalid phone number")
         return value
     

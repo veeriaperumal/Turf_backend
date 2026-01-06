@@ -34,5 +34,9 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view()),
     path('api/', include('Turf.urls')),
     path('api/', include('Accounts.urls')),
+    path("api/", include("slots.urls")),
+    path("api/", include("Dashboard.urls")),
+
+
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

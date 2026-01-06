@@ -3,8 +3,8 @@ Content-Type: application/json
 
 
 {
-  "email": "mageshan@gmail.com",
-  "password": "securePassword123"
+  "email": "rohit@gmail.com",
+    "password": "veni"
 }
 
 ###
@@ -69,3 +69,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
   },
   "device_timestamp": "2026-05-20T18:05:00Z"
 }
+
+
+
+###
+GET  http://localhost:8081/api/profile/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MzAwMDMyLCJpYXQiOjE3Njc2OTUyMzIsImp0aSI6ImM2M2U3ZDI0NDVmNjQ3NWRhYzM4ZWJjZDk3MGIzZjEzIiwidXNlcl9pZCI6IjMiLCJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6InJhbWFuYUBnbWFpbC5jb20ifQ.OQTxl7liQec74d_y7MYwIs0Zr9JSdXS6HjbPf-Wq2Zc
+
+####
+GET http://localhost:8081/api/slots?turf_id=1&date=2023-10-25
+Content-Type: application/json
+
+
+
+####
+GET http://localhost:8081/api/admin/dashboard/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MjA5NjMyLCJpYXQiOjE3Njc2MDQ4MzIsImp0aSI6IjRhYmIxNDBkMGY0YzRlNzQ4NjRkMTdiYWU2Y2U3MzYxIiwidXNlcl9pZCI6IjUiLCJyb2xlIjoiYnVzaW5lc3MiLCJlbWFpbCI6IlBvbnlAdHJ1Zi5jb20ifQ.cBJlPOIz3lOLcqEbXzDRvIn1kddJLKBne2sC5cyI3hk

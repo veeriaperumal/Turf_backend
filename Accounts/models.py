@@ -7,6 +7,8 @@ from django.contrib.auth.models import (
     BaseUserManager,
 )
 
+from config import settings
+
 # ----------------------------------
 # CUSTOM USER MANAGER
 # ----------------------------------
@@ -73,7 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     location = models.CharField(max_length=255, blank=True)
 
     # External profile image (supports S3/CDN URLs)
-    profile_image_url = models.URLField(blank=True)
+    profile_image_url = models.ImageField(upload_to="user/",null=True, blank=True)
 
     # Role controls feature access across the platform
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
@@ -90,3 +92,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # Configure email as the unique login field
     USERNAME_FIELD = "email"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False)

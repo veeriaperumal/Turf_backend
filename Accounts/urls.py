@@ -9,6 +9,7 @@ urlpatterns = [
     
     path("login/", LoginView.as_view()),
     path("profile/update/", ProfileUpdateView.as_view()),
+    path("profile/", ProfileUpdateView.as_view()),
     
     path("business/update/", BusinessUpdateView.as_view()),
     path("business/delete/", BusinessDeleteView.as_view()),

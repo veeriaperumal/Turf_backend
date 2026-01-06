@@ -19,3 +19,4 @@ urlpatterns = [
 
     path("turfs/upload-image/", TurfImageUploadView.as_view(), name="turf-upload-image"),
 ]
+
