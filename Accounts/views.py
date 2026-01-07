@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
-
+from rest_framework.exceptions import PermissionDenied
 from Turf.models import Amenity, Sport, Turf
-from .serializers import BusinessRegisterSerializer, BusinessUpdateByIDSerializer, CustomerRegisterSerializer, ProfileSerializer, ProfileUpdateSerializer
+from .serializers import BusinessOwnerUpdateSerializer, BusinessProfileReadSerializer, BusinessRegisterSerializer, CustomerRegisterSerializer, ProfileSerializer, ProfileUpdateSerializer, TurfUpdateSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -54,14 +54,16 @@ class BusinessRegisterView(APIView):
             "data": {
                 "business_id": f"biz_{owner.id}",
                 "owner_name": owner.full_name,
+                "phone_number": owner.phone_number,
+                "profile_image_url": (
+                    request.build_absolute_uri(owner.profile_image_url.url)
+                    if owner.profile_image_url else None
+                ),
                 "total_turfs_created": len(turf_ids),
                 "turf_ids": turf_ids,
                 "token": str(refresh.access_token),
-                "account_status": "pending_approval"
             }
         }, status=status.HTTP_201_CREATED)
-        
-        
 
 class LoginView(TokenObtainPairView):
     permission_classes= [AllowAny]
@@ -94,8 +96,7 @@ class ProfileUpdateView(APIView):
         }, status=status.HTTP_200_OK)
         
     
-        
-class BusinessUpdateView(APIView):
+class BusinessOwnerUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request):
@@ -104,83 +105,24 @@ class BusinessUpdateView(APIView):
         if user.role != "business":
             return Response(
                 {"detail": "Only business owners allowed"},
-                status=403
+                status=status.HTTP_403_FORBIDDEN
             )
 
-        serializer = BusinessUpdateByIDSerializer(data=request.data)
+        serializer = BusinessOwnerUpdateSerializer(
+            instance=user,
+            data=request.data,
+            partial=True,
+            context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
-
-        data = serializer.validated_data
-        response = {}
-
-        # ---- OWNER UPDATE ----
-        if "owner_id" in data:
-            if data["owner_id"] != user.id:
-                return Response(
-                    {"detail": "Cannot update another owner"},
-                    status=403
-                )
-
-            owner_data = data["owner_details"]
-            owner_data.pop("role", None)
-            owner_data.pop("email", None)
-
-            for field, value in owner_data.items():
-                if field == "password":
-                    user.set_password(value)
-                else:
-                    setattr(user, field, value)
-            user.save()
-
-            response["owner_updated"] = True
-
-        # ---- TURF UPDATE ----
-        if "turf_id" in data:
-            turf = get_object_or_404(
-                Turf,
-                id=data["turf_id"],
-                owner=user
-            )
-
-            turf_data = data["turf_details"]
-
-            # simple fields
-            for field in [
-                "name", "address", "price",
-                "opening_time", "closing_time",
-                "cancellation_policy", "rules"
-            ]:
-                if field in turf_data:
-                    setattr(turf, field, turf_data[field])
-
-            turf.save()
-
-            # M2M replace
-            if "sports_available" in turf_data:
-                sports = [
-                    Sport.objects.get_or_create(
-                        name=name.strip().title()
-                    )[0]
-                    for name in turf_data["sports_available"]
-                ]
-                turf.sports.set(sports)
-
-            if "amenities" in turf_data:
-                amenities = [
-                    Amenity.objects.get_or_create(
-                        name=name.strip().title()
-                    )[0]
-                    for name in turf_data["amenities"]
-                ]
-                turf.amenities.set(amenities)
-
-            response["turf_updated"] = turf.id
+        serializer.save()
 
         return Response({
             "status": "success",
-            "data": response
+            "message": "Business owner updated successfully",
+            "data":serializer.data
+            
         })
-
 
 
 
@@ -204,4 +146,82 @@ class BusinessDeleteView(APIView):
         return Response(
             {"message": "Business account deleted"},
             status=204
+        )
+
+
+class TurfUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, turf_id):
+        user = request.user
+
+        if user.role != "business":
+            return Response(
+                {"detail": "Only business owners allowed"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        turf = get_object_or_404(
+            Turf,
+            id=turf_id,
+            owner=user
+        )
+
+        serializer = TurfUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        with transaction.atomic():
+
+            for field in [
+                "name", "address", "price",
+                "opening_time", "closing_time",
+                "cancellation_policy", "rules"
+            ]:
+                if field in data:
+                    setattr(turf, field, data[field])
+
+            turf.save()
+
+            if "sports_available" in data:
+                sports = [
+                    Sport.objects.get_or_create(
+                        name=name.strip().title()
+                    )[0]
+                    for name in data["sports_available"]
+                ]
+                turf.sports.set(sports)
+
+            if "amenities" in data:
+                amenities = [
+                    Amenity.objects.get_or_create(
+                        name=name.strip().title()
+                    )[0]
+                    for name in data["amenities"]
+                ]
+                turf.amenities.set(amenities)
+
+        return Response({
+            "status": "success",
+            "message": "Turf updated successfully",
+            "turf_id": turf.id
+        })
+
+class BusinessProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        if user.role != "business":
+            raise PermissionDenied("Not a business account")
+
+        serializer = BusinessProfileReadSerializer(user)
+
+        return Response(
+            {
+                "status": "success",
+                "data": serializer.data
+            },
+            status=status.HTTP_200_OK
         )

@@ -5,8 +5,9 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from Turf.exceptions import SlotAlreadyBooked
+from slots.constants import SlotStatus
 from .models import Booking, Turf
-from .service import calculate_booking_price
+# from .service import calculate_booking_price
 
 
 # =========================================================
@@ -147,7 +148,39 @@ class BookingSerializer(serializers.ModelSerializer):
     def get_total_price(self, obj):
         return obj.duration_hours * obj.turf.price
 
+class TurfSerializer(serializers.ModelSerializer):
+    turf_name = serializers.CharField(source="name")
+    cost_per_hour = serializers.IntegerField(source="price")
 
+    operating_hours = serializers.SerializerMethodField()
+    sports_available = serializers.SerializerMethodField()
+    amenities = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Turf
+        fields = [
+            "turf_name",
+            "address",
+            "cost_per_hour",
+            "operating_hours",
+            "sports_available",
+            "amenities",
+            "cancellation_policy",
+        ]
+
+    def get_operating_hours(self, obj):
+        return {
+            "open": obj.opening_time.strftime("%I:%M %p"),
+            "close": obj.closing_time.strftime("%I:%M %p"),
+        }
+
+    def get_sports_available(self, obj):
+        return list(obj.sports.values_list("name", flat=True))
+
+    def get_amenities(self, obj):
+        return list(obj.amenities.values_list("name", flat=True))
+    
+    
 # =========================================================
 # TURF DETAIL SERIALIZER (READ-ONLY)
 # =========================================================
@@ -309,3 +342,4 @@ class BookingConfirmSerializer(serializers.Serializer):
     )
     payment_method = serializers.CharField()
     transaction_id = serializers.CharField()
+

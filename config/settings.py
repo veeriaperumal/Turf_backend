@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-r(2ii5478uqjry^b946w93nvw641z#dg0tj@8vbvbw4jyyn^1p
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = ["https://*.railway.app"]
+CSRF_TRUSTED_ORIGINS = ["https://*.railway.app",'http://192.168.1.69:9000']
 
 # Application definition
 
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Accounts',
     'Turf',
+    'slots',
     'rest_framework', 
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",

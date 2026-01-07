@@ -5,7 +5,11 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from Turf.models import Amenity, Sport, Turf
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from Turf.service import build_business_login_payload
+
 User = get_user_model()
+
 
 class CustomerRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -33,6 +37,7 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,18 +68,10 @@ class TurfCreateSerializer(serializers.Serializer):
     address = serializers.CharField()
     cost_per_hour = serializers.IntegerField()
     operating_hours = OperatingHoursSerializer()
-    sports_available = serializers.ListField(
-        child=serializers.CharField()
-    )
-    amenities = serializers.ListField(
-        child=serializers.CharField(),
-        required=False
-    )
+    sports_available = serializers.ListField(child=serializers.CharField())
+    amenities = serializers.ListField(child=serializers.CharField(), required=False)
     turf_image_url = serializers.URLField(required=False)
-    rules = serializers.ListField(
-        child=serializers.CharField(),
-        required=False
-    )
+    rules = serializers.ListField(child=serializers.CharField(), required=False)
     cancellation_policy = serializers.CharField(required=False)
 
 
@@ -94,13 +91,16 @@ class BusinessOwnerSerializer(serializers.ModelSerializer):
             "role",
         ]
 
+    def get_profile_image_url(self, obj):
+        request = self.context.get("request")
+        if obj.profile_image and request:
+            return request.build_absolute_uri(obj.profile_image.url)
+        return None
+
     def create(self, validated_data):
         validated_data["role"] = "business"
         password = validated_data.pop("password")
-        return User.objects.create_user(
-            password=password,
-            **validated_data
-        )
+        return User.objects.create_user(password=password, **validated_data)
 
 
 class BusinessRegisterSerializer(serializers.Serializer):
@@ -113,8 +113,9 @@ class BusinessRegisterSerializer(serializers.Serializer):
 
             # ✅ validate & create owner properly
             owner_serializer = BusinessOwnerSerializer(
-                data=self.validated_data["owner_details"]
+                data=self.validated_data["owner_details"], context=self.context
             )
+
             owner_serializer.is_valid(raise_exception=True)
 
             owner = owner_serializer.save(role="business")
@@ -154,42 +155,66 @@ class BusinessRegisterSerializer(serializers.Serializer):
 
             return owner, turf_ids
 
-class BusinessUpdateByIDSerializer(serializers.Serializer):
-    owner_id = serializers.IntegerField(required=False)
-    owner_details = BusinessOwnerSerializer(required=False)
+class BusinessOwnerUpdateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
 
-    turf_id = serializers.IntegerField(required=False)
-    turf_details = serializers.DictField(required=False)
+    class Meta:
+        model = User
+        fields = [
+            "full_name",
+            "phone_number",
+            "location",
+            "profile_image_url",
+            "password",
+        ]
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
+
+
+class TurfUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False)
+    address = serializers.CharField(required=False)
+    price = serializers.IntegerField(required=False, min_value=1)
+    opening_time = serializers.TimeField(required=False)
+    closing_time = serializers.TimeField(required=False)
+    cancellation_policy = serializers.CharField(required=False)
+    rules = serializers.ListField(
+        child=serializers.CharField(),
+        required=False
+    )
+    sports_available = serializers.ListField(
+        child=serializers.CharField(),
+        required=False
+    )
+    amenities = serializers.ListField(
+        child=serializers.CharField(),
+        required=False
+    )
 
     def validate(self, attrs):
-        owner_id = attrs.get("owner_id")
-        owner_details = attrs.get("owner_details")
-        turf_id = attrs.get("turf_id")
-        turf_details = attrs.get("turf_details")
+        open_t = attrs.get("opening_time")
+        close_t = attrs.get("closing_time")
 
-        # ❌ No IDs at all
-        if not owner_id and not turf_id:
+        if open_t and close_t and open_t >= close_t:
             raise serializers.ValidationError(
-                "owner_id or turf_id is required"
+                "opening_time must be before closing_time"
             )
-
-        # ❌ Owner update without details
-        if owner_id and not owner_details:
-            raise serializers.ValidationError(
-                "owner_details required when owner_id is provided"
-            )
-
-        # ❌ Turf update without details
-        if turf_id and not turf_details:
-            raise serializers.ValidationError(
-                "turf_details required when turf_id is provided"
-            )
-
         return attrs
 
 
 
 class LoginSerializer(TokenObtainPairSerializer):
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -199,29 +224,71 @@ class LoginSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
+        request = self.context.get("request")
+
+        profile_image_url = (
+            request.build_absolute_uri(self.user.profile_image_url.url)
+            if self.user.profile_image_url and request
+            else None
+        )
 
         data["user"] = {
             "id": self.user.id,
             "role": self.user.role,
             "full_name": self.user.full_name,
             "email": self.user.email,
+            "phone_number": self.user.phone_number,
+            "profile_image_url": profile_image_url,
+            "business_id": f"biz_{self.user.id}" if self.user.role == "business" else None,
         }
+        #  ROLE-BASED EXTENSION
+        if self.user.role in ["admin", "business"]:
+            data["business"] = build_business_login_payload(self.user)
+
         return data
+
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            "full_name",
-            "phone_number",
-            "location",
-            "profile_image_url"
-        ]
+        fields = ["full_name", "phone_number", "location", "profile_image_url"]
 
     def validate_phone_number(self, value):
         if value and len(value) < 10:
             raise serializers.ValidationError("Invalid phone number")
         return value
-    
-    
+
+
+class BusinessProfileReadSerializer(serializers.ModelSerializer):
+    turfs = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "full_name",
+            "email",
+            "phone_number",
+            "location",
+            "profile_image_url",
+            "role",
+            "turfs",
+        ]
+
+    def get_turfs(self, user):
+        turfs = Turf.objects.filter(owner=user)
+
+        return [
+            {
+                "id": turf.id,
+                "name": turf.name,
+                "address": turf.address,
+                "price": turf.price,
+                "opening_time": turf.opening_time,
+                "closing_time": turf.closing_time,
+                "sports": [s.name for s in turf.sports.all()],
+                "amenities": [a.name for a in turf.amenities.all()],
+            }
+            for turf in turfs
+        ]

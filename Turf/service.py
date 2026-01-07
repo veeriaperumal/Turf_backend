@@ -1,6 +1,9 @@
 from datetime import time
 from decimal import Decimal
 
+from .serializers import TurfSerializer
+from Turf.models import Turf
+
 WEEKEND_DAYS = {5, 6}  # Saturday, Sunday
 
 
@@ -45,3 +48,24 @@ def calculate_amounts(turf, duration_hours):
     platform_fee = (base * turf.platform_fee_percent) / 100
     total = base + platform_fee
     return base, platform_fee, total
+
+
+
+
+
+def build_business_login_payload(user):
+    turfs = Turf.objects.filter(owner=user).prefetch_related(
+        "sports", "amenities"
+    )
+
+    return {
+        "business_key": f"TRUF{user.id}",
+        "owner_details": {
+            "full_name": user.full_name,
+            "role": user.role,
+            "email": user.email,
+            "phone_number": user.phone_number,
+            "location": getattr(user, "location", None),
+        },
+        "turfs": TurfSerializer(turfs, many=True).data,
+    }

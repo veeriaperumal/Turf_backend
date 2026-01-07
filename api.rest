@@ -1,0 +1,94 @@
+GET  http://127.0.0.1:8081/api/slots/?turf_id=3&date=2026-01-07
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzM2MjYwLCJpYXQiOjE3Njc3MzUzNjAsImp0aSI6IjBlZmYwYTllNjUwMzQ5NGJiZTlkMjE5N2Y2YTNmZjg0IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.Tb10NV9V-e1Q655cH3eMhIJOiUR3vznOKA-Fdtf2Wes
+Content-Type: application/json
+
+
+
+###
+POST http://localhost:9000//api/slots/bulk-save/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzkwODc3LCJpYXQiOjE3Njc3ODk5NzcsImp0aSI6ImYwMDFlMmFjMjE1ZDQ4NDNiNmE0YWM4YWM4MGQzZDA0IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.f_GgUczxUQcTmtAt6uU__axASWijx2_hTSdt1va5aQw
+
+
+{
+  "turf_id": 1,
+  "date": "2026-01-18",
+  "slots": [
+    {
+      "from": "06:00 AM",
+      "to": "10:00 AM",
+      "status": "AVAILABLE",
+      "price": 2000,
+      "label": "Weekend Block"
+    },
+    {
+      "from": "10:00 AM",
+      "to": "02:00 PM",
+      "status": "AVAILABLE",
+      "price": 2000,
+      "label": "Weekend Block"
+    }
+  ]
+}
+
+
+
+
+###
+POST http://localhost:8081//api/slots/create/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzM2ODM1LCJpYXQiOjE3Njc3MzU5MzUsImp0aSI6IjMzZjRhZGQxZGFjODRlMDE4YTVkNDlkZDA4NTIwNjEyIiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.08HK7E_AIKydyPvge8lHrfnsmSRKDN9_V9rMb9hEHYE
+
+
+{
+  "turf": 2,
+  "date": "2026-01-07",
+  "start_time": "06:00:00",
+  "end_time": "07:00:00",
+  "status": "AVAILABLE",
+  "price": "40.00",
+  "label": "Open Session"
+}
+
+
+###
+PATCH http://localhost:8081//api/slots/19/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzM2ODM1LCJpYXQiOjE3Njc3MzU5MzUsImp0aSI6IjMzZjRhZGQxZGFjODRlMDE4YTVkNDlkZDA4NTIwNjEyIiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.08HK7E_AIKydyPvge8lHrfnsmSRKDN9_V9rMb9hEHYE
+
+{
+  "status": "MAINTENANCE",
+  "price": "0.00",
+  "label": "Field Maintenance"
+}
+
+###
+GET http://localhost:9000/api/list/turfs/
+Content-Type: application/json
+
+
+###
+PATCH  http://localhost:9000/api/slots/smart-save/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzkzMDk0LCJpYXQiOjE3Njc3OTIxOTQsImp0aSI6IjgyYzMwMDY3ZDg0MzRkNTU5MDFmZWM1NDQyNjgwNDk4IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.fS6-WwYAwZ6wCIHUuiea4m2FvD1bCa4qzvyr8kN9McU
+
+{
+  "turf_id": 7,
+  "date": "2026-01-07",
+  "slots": [
+    {
+      "from": "08:00 AM",
+      "to": "09:00 AM",
+      "status": "AVAILABLE",
+      "price": "1500",
+      "label": "Open Session"
+    },
+    {
+      "from": "09:00 AM",
+      "to": "10:00 AM",
+      "status": "BLOCKED",
+      "price": "0",
+      "label": "Admin Block"
+    }
+  ]
+}

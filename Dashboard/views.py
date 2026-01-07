@@ -13,7 +13,7 @@ class AdminDashboardView(APIView):
         admin = request.user
 
         response_data = {
-            "profile": AdminDashboardService.get_profile(admin),
+            # "profile": AdminDashboardService.get_profile(admin),
             "modules": {
                 "user_management": AdminDashboardService.get_user_management_data(),
                 "analytics": AdminDashboardService.get_analytics_data(),

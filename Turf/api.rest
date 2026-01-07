@@ -1,11 +1,21 @@
-POST http://127.0.0.1:8081/api/login/
+POST http://127.0.0.1:9000/api/login/
 Content-Type: application/json
 
 
+# {
+#   "email": "rohit@gmail.com",
+#     "password": "veni"
+# }
+
+# {
+#  "email": "Pony@truf.com",
+#     "password": "ownerPassword789"
+#     }
+
 {
-  "email": "rohit@gmail.com",
-    "password": "veni"
-}
+ "email": "jani@gmail.com",
+    "password": "owner19"
+    }
 
 ###
 POST http://localhost:8081/api/bookings/validate/
@@ -73,17 +83,58 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 
 
 ###
-GET  http://localhost:8081/api/profile/
+GET  http://localhost:9000/api/profile/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MzAwMDMyLCJpYXQiOjE3Njc2OTUyMzIsImp0aSI6ImM2M2U3ZDI0NDVmNjQ3NWRhYzM4ZWJjZDk3MGIzZjEzIiwidXNlcl9pZCI6IjMiLCJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6InJhbWFuYUBnbWFpbC5jb20ifQ.OQTxl7liQec74d_y7MYwIs0Zr9JSdXS6HjbPf-Wq2Zc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3Nzg0MDE0LCJpYXQiOjE3Njc3ODMxMTQsImp0aSI6ImNkYzIwY2U4M2QwMTQ2MmQ5ZjViZjZmYjUyMjQ0NzA5IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.OkL-5mrPnScxEhLwTjYb-ukHs2QGcYt-6s7aQI8h9xM
 
 ####
-GET http://localhost:8081/api/slots?turf_id=1&date=2023-10-25
+GET http://localhost:9000/api/slots?turf_id=1&date=2023-10-25
 Content-Type: application/json
-
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3Nzc3MzkzLCJpYXQiOjE3Njc3NzY0OTMsImp0aSI6IjBlYjYyMDUwYjk4NzQ3MTg5ODc0YzE3NjA5MGRmODU0IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.jpABQThb7Qhttl67Rm6dTYix3YJq4tW0dABoe5_2_Co
 
 ####
 GET http://localhost:8081/api/admin/dashboard/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4MjA5NjMyLCJpYXQiOjE3Njc2MDQ4MzIsImp0aSI6IjRhYmIxNDBkMGY0YzRlNzQ4NjRkMTdiYWU2Y2U3MzYxIiwidXNlcl9pZCI6IjUiLCJyb2xlIjoiYnVzaW5lc3MiLCJlbWFpbCI6IlBvbnlAdHJ1Zi5jb20ifQ.cBJlPOIz3lOLcqEbXzDRvIn1kddJLKBne2sC5cyI3hk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzIzMzY4LCJpYXQiOjE3Njc3MjI0NjgsImp0aSI6ImFjNDYzZWU3ODQ0MjQwZDk4OGNiMjZjZTI0ZmY2ZjU2IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.WOfhDrQJBRnhhFuhX1LcFlbKD0oneUZMd_Lo1ApqUao
+
+####
+PATCH  http://localhost:8081/api/business/owner/update/
+Content-Type: application/json
+Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzIxMTI5LCJpYXQiOjE3Njc3MjAyMjksImp0aSI6IjEyYzJlMzU4YjhhYjRjNDZiNzM4NGUzOTdiMDQxMzljIiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.-luVuufjUKRhKqRa-G21Cpv7L7mRW9WQweFVsQLg1Tk
+
+
+{
+  "full_name": "Updated Arena Name",
+  "phone_number": "9999999999",
+  "location": "Erode"
+}
+
+
+###
+PATCH http://localhost:8081/api/business/turfs/5/update/
+Content-Type: application/json
+Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzEwMTI3LCJpYXQiOjE3Njc3MDkyMjcsImp0aSI6ImUwYWY3MjJlOTgwOTRhNzRhOGQ3YTJkYTliNzUxZjEzIiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.ycXV_Nn3T15PbE3u5ksjp1z6dEv6z0AOuR9hSAfjn9c
+
+{
+  "price": 1800,
+  "rules": ["No alcohol", "ID required"],
+  "sports_available": ["Football", "Cricket"],
+  "amenities": ["Parking", "Washroom"]
+}
+
+
+
+###
+POST http://localhost:9000/api/token/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3MDM2MzEyMywiaWF0IjoxNzY3NzcxMTIzLCJqdGkiOiIyNmMwZTUxNTE2Nzg0MWY4ODk0YzA1ZDZlNWNiMWRiMSIsInVzZXJfaWQiOiIxMCIsInJvbGUiOiJidXNpbmVzcyIsImVtYWlsIjoiamFuaUBnbWFpbC5jb20ifQ.eIsmtNsTOyuugUIR-dh74FhY_T1Eu5o8zBmEV8Q55WI"
+}
+
+
+
+###
+GET http://localhost:9000/api/business/profile/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3Nzg0NDc4LCJpYXQiOjE3Njc3ODM1NzgsImp0aSI6ImY0YTI3OGI3NzBhODQ5MjlhY2U2MWYzODY4YTY2NzQ5IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.Gg47HzrlyJ7_lN_Rici2-gzUm1FTNM_YHg1LUhIfiyw
