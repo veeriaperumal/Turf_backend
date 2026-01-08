@@ -90,102 +90,69 @@ class Turf(models.Model):
 # =========================
 # BOOKING MODEL
 # =========================
-
 class Booking(models.Model):
-    """
-    Represents a reservation made by a user for a turf.
-    Payment is linked separately.
-    """
-
-    # Booking types
     HOURLY = "hourly"
     FULL_DAY = "full_day"
 
-    BOOKING_TYPE_CHOICES = [
-        (HOURLY, "Hourly"),
-        (FULL_DAY, "Full Day"),
-    ]
-
-    # Booking lifecycle states
     CONFIRMED = "CONFIRMED"
     CANCELLED = "CANCELLED"
+    PENDING = "PENDING"
 
-    STATUS_CHOICES = [
-        (CONFIRMED, "Confirmed"),
-        (CANCELLED, "Cancelled"),
-    ]
+    turf = models.ForeignKey(Turf, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    turf = models.ForeignKey(
-        Turf,
-        on_delete=models.CASCADE,
-        related_name="bookings"
-    )
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
-
-    booking_type = models.CharField(
-        max_length=10,
-        choices=BOOKING_TYPE_CHOICES
-    )
-
+    booking_type = models.CharField(max_length=10)
     booking_date = models.DateField()
 
-    # Only applicable for hourly bookings
-    start_time = models.TimeField(null=True, blank=True)
-    end_time = models.TimeField(null=True, blank=True)
-
-    # Derived value (used for pricing + validation)
-    duration_hours = models.PositiveSmallIntegerField()
-
-    # Pricing breakdown (snapshotted at booking time)
     base_amount = models.DecimalField(max_digits=10, decimal_places=2)
     platform_fee = models.DecimalField(max_digits=10, decimal_places=2)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
-        default=CONFIRMED
+        default=PENDING
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # Improves lookup for availability checks
         indexes = [
             models.Index(fields=["turf", "booking_date"]),
         ]
 
-    def clean(self):
-        """
-        Business rule validation.
-        Runs on full_clean() before save().
-        """
 
-        # Full-day bookings must NOT have time slots
-        if self.booking_type == self.FULL_DAY:
-            if self.start_time or self.end_time:
-                raise ValidationError(
-                    "Full day booking cannot have start/end time"
-                )
 
-        # Hourly bookings MUST have valid time range
-        if self.booking_type == self.HOURLY:
-            if not self.start_time or not self.end_time:
-                raise ValidationError(
-                    "Hourly booking requires start and end time"
-                )
-            if self.start_time >= self.end_time:
-                raise ValidationError(
-                    "Invalid time range"
-                )
+class BookingSlot(models.Model):
+    PENDING = "PENDING"
+    CONFIRMED = "CONFIRMED"
+    CANCELLED = "CANCELLED"
 
-    def __str__(self):
-        return f"{self.turf} | {self.booking_date} | {self.booking_type}"
+    booking = models.ForeignKey(
+        Booking,
+        related_name="slots",
+        on_delete=models.CASCADE
+    )
 
+    turf = models.ForeignKey(Turf, on_delete=models.CASCADE)
+
+    booking_date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    status = models.CharField(
+        max_length=20,
+        default=PENDING
+    )
+
+    class Meta:
+        unique_together = (
+            "turf",
+            "booking_date",
+            "start_time",
+            "end_time",
+        )
 
 # =========================
 # DYNAMIC PRICING MODEL

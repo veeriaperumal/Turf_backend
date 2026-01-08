@@ -83,8 +83,8 @@ class BookingAdmin(admin.ModelAdmin):
         "user",
         "booking_type",
         "booking_date",
-        "start_time",
-        "end_time",
+        # "start_time",
+        # "end_time",   
         "status",
         "created_at",
     )

@@ -1,6 +1,8 @@
 # turf/utils.py
 from datetime import datetime, timedelta, date
 
+
+
 def generate_hour_slots(open_time, close_time):
     slots = []
 
@@ -29,3 +31,36 @@ def expand_booking_slots(start, end):
             current += timedelta(hours=1)
 
         return slots
+    
+    
+def build_booking_response(booking):
+    slots = booking.slots.all()
+
+    return {
+        "turf_data": {
+            "turf_id": str(booking.turf.id),
+            "turf_name": booking.turf.name,
+        },
+        "booking_details": {
+            "booking_date": booking.booking_date.strftime("%Y-%m-%d"),
+            "sport": "Football",
+        },
+        "slots_booked": [
+            {
+                "slot_id": s.id,
+                "from_time": s.start_time.strftime("%I:%M %p"),
+                "to_time": s.end_time.strftime("%I:%M %p"),
+                "status": s.status,
+                "price": f"{s.price:.2f}",
+                "label": "Standard Booking",
+            }
+            for s in slots
+        ],
+        "price_breakdown": {
+            "total_amount": float(booking.total_amount)
+        },
+        "user_details": {
+            "user_id": booking.user.id
+        }
+    }
+

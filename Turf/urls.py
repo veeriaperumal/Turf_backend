@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import BookingConfirmView, BookingPayView, BookingValidationView, BookingViewSet, TurfAvailabilityView, TurfDetailView, TurfListView, TurfImageUploadView
+from .views import BookingConfirmView, BookingCreateView, BookingDetailView, BookingListView, BookingPayView, BookingUpdateView, BookingValidationView, BookingViewSet, TurfAvailabilityView, TurfDetailView, TurfListView, TurfImageUploadView
 
 router = DefaultRouter()
 router.register("bookings", BookingViewSet, basename="booking"),
@@ -18,5 +18,10 @@ urlpatterns = [
     path('bookings/pay/', BookingPayView.as_view(), name='booking-pay'),
 
     path("turfs/upload-image/", TurfImageUploadView.as_view(), name="turf-upload-image"),
+    path("booking/slot/",BookingCreateView.as_view()),
+    
+    path("bookings/", BookingListView.as_view()),
+    path("bookings/<int:booking_id>/", BookingDetailView.as_view()),
+    path("bookings/<int:booking_id>/update/", BookingUpdateView.as_view()),
 ]
 

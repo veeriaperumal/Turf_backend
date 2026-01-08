@@ -5,13 +5,12 @@ Content-Type: application/json
 
 
 ###
-POST http://localhost:9000//api/slots/bulk-save/
+POST http://localhost:8081//api/slots/bulk-save/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzkwODc3LCJpYXQiOjE3Njc3ODk5NzcsImp0aSI6ImYwMDFlMmFjMjE1ZDQ4NDNiNmE0YWM4YWM4MGQzZDA0IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.f_GgUczxUQcTmtAt6uU__axASWijx2_hTSdt1va5aQw
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3ODg1NDUyLCJpYXQiOjE3Njc4ODQ1NTIsImp0aSI6IjM5ZmQ3M2VkZTBkMTQyMmQ5Yzg5MmNjZjVhOGFhNDhlIiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.vicpgzxmEuUyM2XTvWUKXS802ekULWjYb2PzzgNU1mg
 
 {
-  "turf_id": 1,
+  "turf_id": 8,
   "date": "2026-01-18",
   "slots": [
     {
@@ -68,13 +67,13 @@ Content-Type: application/json
 
 
 ###
-PATCH  http://localhost:9000/api/slots/smart-save/
+PATCH  http://localhost:8081/api/slots/smart-save/
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3NzkzMDk0LCJpYXQiOjE3Njc3OTIxOTQsImp0aSI6IjgyYzMwMDY3ZDg0MzRkNTU5MDFmZWM1NDQyNjgwNDk4IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.fS6-WwYAwZ6wCIHUuiea4m2FvD1bCa4qzvyr8kN9McU
 
 {
   "turf_id": 7,
-  "date": "2026-01-07",
+  "date": "2026-01-08",
   "slots": [
     {
       "from": "08:00 AM",
@@ -86,9 +85,75 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
     {
       "from": "09:00 AM",
       "to": "10:00 AM",
+      "status": "MAINTAINANCE",
+      "price": "0",
+      "label": "Admin Block"
+    },
+    {
+      "from": "11:00 AM",
+      "to": "12:00 AM",
+      "status": "BOOKED",
+      "price": "0",
+      "label": "Admin Block"
+    },
+    {
+      "from": "19:00 PM",
+      "to": "20:00 PM",
       "status": "BLOCKED",
       "price": "0",
       "label": "Admin Block"
     }
   ]
 }
+
+####
+POST http://localhost:9000/api/booking/slot/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3ODEwNDEyLCJpYXQiOjE3Njc4MDk1MTIsImp0aSI6IjgzYTFiYTZkM2UwNjQ1ZjVhMzk2ZDg4OGZmOGY5MGU5IiwidXNlcl9pZCI6IjYiLCJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6InZlbmthdEBnbWFpbC5jb20ifQ.vr6qEdJ2YKVNQKvV7AeJQOI-xTnVOJyIjDiKgAu0eqY
+
+
+{
+  "turf_data": {
+    "turf_id": "1"
+  },
+  "booking_details": {
+    "booking_date": "2026-01-08",
+    "sport": "Football"
+  },
+  "slots_booked": [
+    {
+      "slot_id": 0,
+      "from_time": "04:00 PM",
+      "to_time": "05:00 PM",
+      "status": "PENDING",
+      "price": "50.00",
+      "label": "Standard Booking"
+    },
+    {
+      "slot_id": 0,
+      "from_time": "05:00 PM",
+      "to_time": "06:00 PM",
+      "status": "PENDING",
+      "price": "50.00",
+      "label": "Standard Booking"
+    }
+  ],
+  "price_breakdown": {
+    "total_amount": 105.00
+  },
+  "user_details": {
+    "user_id": 6
+  }
+}
+
+###
+GET http://localhost:8081/api/bookings/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3ODc1Mzg2LCJpYXQiOjE3Njc4NzQ0ODYsImp0aSI6IjA3NmM1OGY4YmM1ZjRlOWE4YWQyODllN2FmN2JlMDBlIiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.dgixb7RzWWdJb389c9H5hbfNGVeZ2rhr9-XDs3bapXc
+
+
+
+###
+GET http://localhost:8081/api/bookings/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3ODc1Mzg2LCJpYXQiOjE3Njc4NzQ0ODYsImp0aSI6IjA3NmM1OGY4YmM1ZjRlOWE4YWQyODllN2FmN2JlMDBlIiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.dgixb7RzWWdJb389c9H5hbfNGVeZ2rhr9-XDs3bapXc

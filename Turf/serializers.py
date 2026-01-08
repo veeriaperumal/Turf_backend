@@ -4,10 +4,10 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
 
-from Turf.exceptions import SlotAlreadyBooked
-from slots.constants import SlotStatus
-from .models import Booking, Turf
-# from .service import calculate_booking_price
+from Accounts.models import User
+from Turf.service import calculate_booking_price
+from .models import Booking, BookingSlot, Turf
+
 
 
 # =========================================================
@@ -343,3 +343,249 @@ class BookingConfirmSerializer(serializers.Serializer):
     payment_method = serializers.CharField()
     transaction_id = serializers.CharField()
 
+
+
+# -------------------------
+# SLOT SERIALIZER (READ)
+# -------------------------
+class BookingSlotResponseSerializer(serializers.ModelSerializer):
+    from_time = serializers.SerializerMethodField()
+    to_time = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BookingSlot
+        fields = [
+            "from_time",
+            "to_time",
+            "status",
+            "price",
+        ]
+
+    def get_from_time(self, obj):
+        return obj.start_time.strftime("%I:%M %p")
+
+    def get_to_time(self, obj):
+        return obj.end_time.strftime("%I:%M %p")
+
+
+# -------------------------
+# MAIN BOOKING SERIALIZER
+# -------------------------
+class BookingCreateSerializer(serializers.Serializer):
+
+    turf_data = serializers.DictField()
+    booking_details = serializers.DictField()
+    slots_booked = serializers.ListField()
+    price_breakdown = serializers.DictField()
+    user_details = serializers.DictField()
+
+    def validate(self, data):
+        # Turf
+        turf_id = data["turf_data"].get("turf_id")
+        if not turf_id:
+            raise serializers.ValidationError("turf_id is required")
+
+        try:
+            turf = Turf.objects.get(id=turf_id)
+        except Turf.DoesNotExist:
+            raise serializers.ValidationError("Invalid turf_id")
+
+        # User
+        user_id = data["user_details"].get("user_id")
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid user_id")
+
+        # Date
+        try:
+            booking_date = datetime.strptime(
+                data["booking_details"]["booking_date"],
+                "%Y-%m-%d"
+            ).date()
+        except Exception:
+            raise serializers.ValidationError("Invalid booking_date")
+
+        # Slots
+        if not data["slots_booked"]:
+            raise serializers.ValidationError("At least one slot required")
+
+        data["_validated"] = {
+            "turf": turf,
+            "user": user,
+            "booking_date": booking_date,
+        }
+
+        return data
+
+    @transaction.atomic
+    def create(self, validated_data):
+        turf = validated_data["_validated"]["turf"]
+        user = validated_data["_validated"]["user"]
+        booking_date = validated_data["_validated"]["booking_date"]
+
+        slots_payload = validated_data["slots_booked"]
+        total_amount = validated_data["price_breakdown"]["total_amount"]
+
+        # -------------------------
+        # CREATE BOOKING (PARENT)
+        # -------------------------
+        booking = Booking.objects.create(
+            turf=turf,
+            user=user,
+            booking_type=Booking.HOURLY,
+            booking_date=booking_date,
+            base_amount=total_amount,
+            platform_fee=0,
+            total_amount=total_amount,
+            status=Booking.PENDING,
+        )
+
+        # -------------------------
+        # CREATE SLOTS (LOCKED)
+        # -------------------------
+        for slot in slots_payload:
+            start_time = datetime.strptime(
+                slot["from_time"], "%I:%M %p"
+            ).time()
+            end_time = datetime.strptime(
+                slot["to_time"], "%I:%M %p"
+            ).time()
+
+            # HARD LOCK: no overlapping slot allowed
+            exists = BookingSlot.objects.select_for_update().filter(
+                turf=turf,
+                booking_date=booking_date,
+                start_time=start_time,
+                end_time=end_time,
+            ).exists()
+
+            if exists:
+                raise serializers.ValidationError(
+                    f"Slot {slot['from_time']} - {slot['to_time']} already booked"
+                )
+
+            BookingSlot.objects.create(
+                booking=booking,
+                turf=turf,
+                booking_date=booking_date,
+                start_time=start_time,
+                end_time=end_time,
+                price=slot["price"],
+                status=BookingSlot.PENDING,
+            )
+
+        return booking
+    
+    
+
+class BookingUpdateSerializer(serializers.ModelSerializer):
+    """
+    Allowed updates:
+    - booking_date
+    - slots (time change)
+    """
+
+    slots = serializers.ListField(
+        child=serializers.DictField(),
+        required=False
+    )
+
+    class Meta:
+        model = Booking
+        fields = (
+            "booking_date",
+            "slots",
+        )
+
+    # -------------------------
+    # VALIDATION
+    # -------------------------
+    def validate(self, data):
+        booking = self.instance
+        today = timezone.localdate()
+
+        if booking.status in [Booking.COMPLETED, Booking.CANCELLED]:
+            raise serializers.ValidationError(
+                "Completed or cancelled bookings cannot be modified"
+            )
+
+        if booking.booking_date < today:
+            raise serializers.ValidationError(
+                "Past bookings cannot be updated"
+            )
+
+        return data
+
+    # -------------------------
+    # UPDATE LOGIC
+    # -------------------------
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        slots_data = validated_data.pop("slots", None)
+
+        # Update booking_date if provided
+        if "booking_date" in validated_data:
+            instance.booking_date = validated_data["booking_date"]
+
+        # -------------------------
+        # SLOT UPDATE
+        # -------------------------
+        if slots_data is not None:
+            # DELETE old slots (locked)
+            BookingSlot.objects.select_for_update().filter(
+                booking=instance
+            ).delete()
+
+            total_amount = 0
+
+            for slot in slots_data:
+                try:
+                    start_time = datetime.strptime(
+                        slot["from_time"], "%I:%M %p"
+                    ).time()
+                    end_time = datetime.strptime(
+                        slot["to_time"], "%I:%M %p"
+                    ).time()
+                except KeyError:
+                    raise serializers.ValidationError(
+                        "Slots must contain from_time and to_time"
+                    )
+
+                # Overlap protection
+                conflict = BookingSlot.objects.filter(
+                    turf=instance.turf,
+                    booking_date=instance.booking_date,
+                    start_time__lt=end_time,
+                    end_time__gt=start_time,
+                    status__in=[BookingSlot.PENDING, BookingSlot.CONFIRMED],
+                ).exists()
+
+                if conflict:
+                    raise serializers.ValidationError(
+                        f"Slot {slot['from_time']} - {slot['to_time']} already booked"
+                    )
+
+                price = calculate_booking_price(
+                    turf=instance.turf,
+                    start_time=start_time,
+                    end_time=end_time,
+                    booking_date=instance.booking_date,
+                )
+
+                BookingSlot.objects.create(
+                    booking=instance,
+                    turf=instance.turf,
+                    booking_date=instance.booking_date,
+                    start_time=start_time,
+                    end_time=end_time,
+                    price=price,
+                    status=BookingSlot.PENDING,
+                )
+
+                total_amount += price
+
+            instance.total_amount = total_amount
+
+        instance.save()
+        return instance

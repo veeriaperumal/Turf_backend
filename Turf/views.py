@@ -8,18 +8,27 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from Turf.utils import expand_booking_slots, generate_hour_slots
+from Turf.utils import build_booking_response, expand_booking_slots, generate_hour_slots
 
 from .models import Booking, Payment, Turf
 from .serializers import (
     BookingConfirmSerializer,
+    BookingCreateSerializer,
     BookingPaySerializer,
     BookingSerializer,
+    BookingUpdateSerializer,
     BookingValidationSerializer,
     TurfAvailabilityQuerySerializer,
     TurfDetailSerializer,
     TurfImageUploadSerializer,
+    
 )
+
+
+
+
+
+
 
 # -------------------------------------------------------------------
 # TURF DETAIL (SINGLE TURF)
@@ -416,3 +425,107 @@ class TurfImageUploadView(APIView):
             "image_url": turf.image.url
         })
 
+
+
+
+class BookingCreateView(APIView):
+
+    def post(self, request):
+        serializer = BookingCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        booking = serializer.save()
+
+        # -------------------------
+        # RESPONSE (MATCHES PAYLOAD)
+        # -------------------------
+        slots = booking.slots.all()
+
+        response = {
+            "turf_data": {
+                "turf_id": str(booking.turf.id),
+                "turf_name": booking.turf.name,
+            },
+            "booking_details": {
+                "booking_date": booking.booking_date.strftime("%Y-%m-%d"),
+                "sport": "Football",  # UI concern; backend doesn’t store it
+            },
+            "slots_booked": [
+                {
+                    "slot_id": 0,
+                    "from_time": s.start_time.strftime("%I:%M %p"),
+                    "to_time": s.end_time.strftime("%I:%M %p"),
+                    "status": s.status,
+                    "price": f"{s.price:.2f}",
+                    "label": "Standard Booking",
+                }
+                for s in slots
+            ],
+            "price_breakdown": {
+                "total_amount": float(booking.total_amount)
+            },
+            "user_details": {
+                "user_id": booking.user.id
+            }
+        }
+
+        return Response(
+            response,
+            status=status.HTTP_201_CREATED
+        )
+
+
+class BookingListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        bookings = Booking.objects.select_related("turf", "user").prefetch_related("slots")
+
+        data = []
+        for booking in bookings:
+            data.append(build_booking_response(booking))
+
+        return Response(
+            {"status": "success", "data": data},
+            status=status.HTTP_200_OK
+        )
+
+
+class BookingDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, booking_id):
+        return get_object_or_404(
+            Booking.objects.select_related("turf", "user").prefetch_related("slots"),
+            id=booking_id
+        )
+
+    def get(self, request, booking_id):
+        booking = self.get_object(booking_id)
+
+        return Response(
+            {"status": "success", "data": build_booking_response(booking)},
+            status=status.HTTP_200_OK
+        )
+
+
+
+class BookingUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, booking_id):
+        booking = get_object_or_404(Booking, id=booking_id)
+
+        serializer = BookingUpdateSerializer(
+            booking, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        booking = serializer.save()
+
+        return Response(
+            {
+                "status": "success",
+                "message": "Booking updated successfully",
+                "data": build_booking_response(booking),
+            },
+            status=status.HTTP_200_OK
+        )

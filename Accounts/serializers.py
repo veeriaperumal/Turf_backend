@@ -6,7 +6,7 @@ from django.db import transaction
 from Turf.models import Amenity, Sport, Turf
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from Turf.service import build_business_login_payload
+from Turf.presentors import build_business_login_payload
 
 User = get_user_model()
 

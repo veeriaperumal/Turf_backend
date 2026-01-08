@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-r(2ii5478uqjry^b946w93nvw641z#dg0tj@8vbvbw4jyyn^1p
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = ["https://*.railway.app",'http://192.168.1.69:9000']
+CSRF_TRUSTED_ORIGINS = ["https://*.railway.app",'http://192.168.1.69:9000',]
 
 # Application definition
 
@@ -139,7 +139,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR)
 STATIC_URL = "static/"
 STATIC_URL = "static/"
 
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 AUTH_USER_MODEL='Accounts.User'
 
