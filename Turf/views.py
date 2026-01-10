@@ -7,7 +7,7 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from Turf.utils import build_booking_response, expand_booking_slots, generate_hour_slots
 
 from .models import Booking, Payment, Turf
@@ -397,8 +397,8 @@ class TurfImageUploadView(APIView):
     Allows business owners to upload turf images
     """
     permission_classes = [IsAuthenticated]
-
-    def patch(self, request):
+    parser_classes = [MultiPartParser, FormParser]  # REQUIRED
+    def put(self, request):
         user = request.user
 
         if user.role != "business":
@@ -416,8 +416,8 @@ class TurfImageUploadView(APIView):
             owner=user
         )
 
-        turf.image = serializer.validated_data["image"]
-        turf.save()
+        image = serializer.validated_data["image"]
+        turf.image.save(image.name, image, save=True)
 
         return Response({
             "status": "success",

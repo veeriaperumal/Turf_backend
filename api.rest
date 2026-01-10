@@ -62,7 +62,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 }
 
 ###
-GET http://localhost:9000/api/list/turfs/
+GET http://192.168.1.47:8081/api/list/turfs/
 Content-Type: application/json
 
 

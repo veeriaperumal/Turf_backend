@@ -1,4 +1,4 @@
-POST http://127.0.0.1:8081/api/login/
+POST http://192.168.1.47:8081/api/login/
 Content-Type: application/json
 
 
@@ -135,6 +135,6 @@ Content-Type: application/json
 
 
 ###
-GET http://localhost:9000/api/business/profile/
+GET http://192.168.1.47:8081/api/business/profile/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3Nzg0NDc4LCJpYXQiOjE3Njc3ODM1NzgsImp0aSI6ImY0YTI3OGI3NzBhODQ5MjlhY2U2MWYzODY4YTY2NzQ5IiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.Gg47HzrlyJ7_lN_Rici2-gzUm1FTNM_YHg1LUhIfiyw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3OTAyMTQ4LCJpYXQiOjE3Njc5MDEyNDgsImp0aSI6IjAzNTlmOTM5NGI5MTQ0ZDc5Zjc1N2VjNzM2ODkwN2NjIiwidXNlcl9pZCI6IjEwIiwicm9sZSI6ImJ1c2luZXNzIiwiZW1haWwiOiJqYW5pQGdtYWlsLmNvbSJ9.Tc-J42G7p6M_Fq0iBP23IhOwG-3AqrK0T5zZ4DurXbM
